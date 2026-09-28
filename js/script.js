@@ -24,16 +24,23 @@ function setRsvp(btn, choice) {
 // Personaliza la invitación según el token ?i= de la URL, buscando el
 // nombre en data/invitados.json (generado por tools/generar_invitados.py)
 async function cargarInvitado() {
-  const nombreEl = document.getElementById('invitation-name');
   const token = new URLSearchParams(window.location.search).get('i');
-  if (!nombreEl || !token) return;
+  if (!token) return;
 
   try {
     const res = await fetch('data/invitados.json');
     const invitados = await res.json();
     const invitado = invitados[token];
-    if (invitado) {
-      nombreEl.textContent = invitado.nombre;
+    if (!invitado) return;
+
+    const nombreEl = document.getElementById('invitation-name');
+    if (nombreEl) nombreEl.textContent = invitado.nombre;
+
+    // En el popup de entrada el nombre queda oculto si no hay invitado
+    const gateNombreEl = document.getElementById('entry-guest-name');
+    if (gateNombreEl) {
+      gateNombreEl.textContent = invitado.nombre;
+      gateNombreEl.classList.remove('hidden');
     }
   } catch (err) {
     console.error('No se pudo cargar data/invitados.json', err);

@@ -31,11 +31,22 @@ body {
   padding: 0.5rem 0.5rem 2.5rem;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 12px 28px -8px rgba(0, 0, 0, 0.3);
-  transition: transform .3s ease;
+  transition: transform .35s ease, box-shadow .35s ease;
 }
 
-.polaroid:hover {
-  transform: scale(1.025);
+/* hovered photo comes to the front and grows */
+.gallery-item {
+  position: relative;
+  z-index: 1;
+}
+
+.gallery-item:hover {
+  z-index: 20;
+}
+
+.gallery-item:hover .polaroid {
+  transform: scale(1.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 24px 48px -10px rgba(0, 0, 0, 0.4);
 }
 
 .cd-box {
