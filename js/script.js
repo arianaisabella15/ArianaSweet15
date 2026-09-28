@@ -70,6 +70,28 @@ function renderConfirmacion(invitado) {
   const boton = document.getElementById('rsvp-confirm');
   boton.classList.remove('hidden');
   boton.addEventListener('click', () => enviarConfirmacion(boton, lista));
+
+  marcarConfirmados(lista);
+}
+
+// Marca los checks con lo que la familia ya confirmó antes, leído de la
+// hoja de Google. Si falla, la lista simplemente queda sin marcar.
+async function marcarConfirmados(lista) {
+  const token = new URLSearchParams(window.location.search).get('i');
+  if (!RSVP_ENDPOINT || !token) return;
+
+  try {
+    const res = await fetch(`${RSVP_ENDPOINT}?token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!data.ok || !data.confirmado) return;
+
+    const asistentes = new Set(data.asistentes);
+    lista.querySelectorAll('input').forEach((check) => {
+      check.checked = asistentes.has(check.value);
+    });
+  } catch (err) {
+    console.error('No se pudo leer la confirmación guardada', err);
+  }
 }
 
 async function enviarConfirmacion(boton, lista) {

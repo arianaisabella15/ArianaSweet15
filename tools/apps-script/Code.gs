@@ -45,6 +45,27 @@ function doPost(e) {
   }
 }
 
+// Devuelve lo que ya confirmó un código (?token=...), para que la página
+// marque los checks al cargar. confirmado=false si aún no ha respondido.
+function doGet(e) {
+  try {
+    const token = e.parameter.token;
+    const filas = obtenerHoja()
+      .getDataRange()
+      .getValues()
+      .slice(1)
+      .filter((fila) => fila[1] === token);
+
+    return responder({
+      ok: true,
+      confirmado: filas.length > 0,
+      asistentes: filas.filter((fila) => fila[4] === 'Sí').map((fila) => fila[3]),
+    });
+  } catch (err) {
+    return responder({ ok: false, error: String(err) });
+  }
+}
+
 // Reemplaza la confirmación anterior de ese código, si existía, para que
 // volver a confirmar no duplique personas
 function guardar(token, filas) {
