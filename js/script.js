@@ -1,3 +1,7 @@
+// URL de la aplicación web de Google Apps Script que guarda las
+// confirmaciones en Google Sheets (ver tools/apps-script/README.md)
+const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzi4Ol2Vl8NCI_wfbXP36w3HAIaPqQuY7-n0ph2HD3wA7qnxqJEbNb1uEPHWT2j63A/exec';
+
 // Countdown — set your target date/time here
 const target = new Date('2026-12-30T19:00:00');
 function tick() {
@@ -15,37 +19,90 @@ function tick() {
 tick();
 setInterval(tick, 1000);
 
-// Simple exclusive-choice RSVP toggle
-function setRsvp(btn, choice) {
-  document.querySelectorAll('.rsvp-btn').forEach(b => b.setAttribute('aria-pressed','false'));
-  btn.setAttribute('aria-pressed','true');
-}
-
 // Personaliza la invitación según el token ?i= de la URL, buscando el
-// nombre en data/invitados.json (generado por tools/generar_invitados.py)
-async function cargarInvitado() {
+// nombre en window.INVITADOS (data/invitados.js, generado por
+// tools/generar_invitados.py)
+function cargarInvitado() {
   const token = new URLSearchParams(window.location.search).get('i');
-  if (!token) return;
+  const invitado = token && window.INVITADOS && window.INVITADOS[token];
+  renderConfirmacion(invitado);
+  if (!invitado) return;
 
-  try {
-    const res = await fetch('data/invitados.json');
-    const invitados = await res.json();
-    const invitado = invitados[token];
-    if (!invitado) return;
+  const nombreEl = document.getElementById('invitation-name');
+  if (nombreEl) nombreEl.textContent = invitado.nombre;
 
-    const nombreEl = document.getElementById('invitation-name');
-    if (nombreEl) nombreEl.textContent = invitado.nombre;
-
-    // En el popup de entrada el nombre queda oculto si no hay invitado
-    const gateNombreEl = document.getElementById('entry-guest-name');
-    if (gateNombreEl) {
-      gateNombreEl.textContent = invitado.nombre;
-      gateNombreEl.classList.remove('hidden');
-    }
-  } catch (err) {
-    console.error('No se pudo cargar data/invitados.json', err);
+  // En el popup de entrada el nombre queda oculto si no hay invitado
+  const gateNombreEl = document.getElementById('entry-guest-name');
+  if (gateNombreEl) {
+    gateNombreEl.textContent = invitado.nombre;
+    gateNombreEl.classList.remove('hidden');
   }
 }
+
+// Confirmar asistencia — a checkbox per name on the card. Without a valid
+// ?i= token there is nobody to confirm, so only a hint is shown.
+function renderConfirmacion(invitado) {
+  const lista = document.getElementById('rsvp-guests');
+  if (!lista) return;
+
+  if (!invitado) {
+    document.getElementById('rsvp-no-guest').classList.remove('hidden');
+    return;
+  }
+
+  invitado.invitados.forEach((nombre) => {
+    const fila = document.createElement('label');
+    fila.className =
+      'rsvp-guest flex items-center gap-3 px-4 py-3 rounded-2xl border-2 border-stone-200 bg-white hover:border-stone-300 hover:shadow-md font-semibold cursor-pointer';
+
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.value = nombre;
+    check.className = 'w-5 h-5 shrink-0';
+
+    const texto = document.createElement('span');
+    texto.textContent = nombre;
+
+    fila.append(check, texto);
+    lista.append(fila);
+  });
+
+  const boton = document.getElementById('rsvp-confirm');
+  boton.classList.remove('hidden');
+  boton.addEventListener('click', () => enviarConfirmacion(boton, lista));
+}
+
+async function enviarConfirmacion(boton, lista) {
+  const token = new URLSearchParams(window.location.search).get('i');
+  const asistentes = [...lista.querySelectorAll('input:checked')].map((c) => c.value);
+
+  boton.disabled = true;
+  mostrarEstadoRsvp('Enviando…', 'text-stone-500');
+  try {
+    if (!RSVP_ENDPOINT) throw new Error('RSVP_ENDPOINT sin configurar');
+    // Sin headers: el body va como text/plain, que Apps Script acepta sin
+    // la petición previa de CORS que no sabe responder
+    const res = await fetch(RSVP_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify({ token, asistentes }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    mostrarEstadoRsvp('¡Gracias! Tu confirmación fue registrada.', 'text-green-600');
+  } catch (err) {
+    console.error('No se pudo enviar la confirmación', err);
+    mostrarEstadoRsvp('No se pudo enviar la confirmación. Intenta de nuevo.', 'text-red-600');
+  } finally {
+    boton.disabled = false;
+  }
+}
+
+function mostrarEstadoRsvp(texto, color) {
+  const estado = document.getElementById('rsvp-status');
+  estado.textContent = texto;
+  estado.className = `mt-4 text-center font-medium ${color}`;
+}
+
 cargarInvitado();
 
 // Hero parallax — the photo drifts slower than the scroll while the hero
@@ -65,7 +122,9 @@ if (heroImage) {
 }
 
 // Scroll reveal — each .reveal card starts hidden and fades/slides in
-// the first time it enters the viewport
+// the first time it enters the viewport. threshold 0 (not a % of the
+// card) so tall cards like the gallery, taller than the viewport, still
+// trigger; rootMargin makes it fire once the card is 80px on screen.
 const revealObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
@@ -75,7 +134,7 @@ const revealObserver = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.15, rootMargin: '0px 0px -80px 0px' }
+  { threshold: 0, rootMargin: '0px 0px -80px 0px' }
 );
 document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
 

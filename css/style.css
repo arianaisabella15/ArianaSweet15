@@ -54,18 +54,18 @@ body {
   color: #fff;
 }
 
-.rsvp-btn {
+/* RSVP: one checkable row per invited name */
+.rsvp-guest {
   transition: all .2s ease;
 }
 
-.rsvp-btn[aria-pressed="true"].yes {
+.rsvp-guest:has(input:checked) {
   border-color: #22c55e;
   background: #f0fdf4;
 }
 
-.rsvp-btn[aria-pressed="true"].no {
-  border-color: #ef4444;
-  background: #fef2f2;
+.rsvp-guest input {
+  accent-color: #22c55e;
 }
 
 /* CTA button with the exact gradient + animated "shine" sweep from the original */

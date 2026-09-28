@@ -69,8 +69,8 @@
             <path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"></path>
           </svg>
         </div>
-        <p id="entry-guest-name" class="hidden text-2xl sm:text-3xl font-semibold mb-2"></p>
         <p class="text-2xl sm:text-3xl opacity-90 mb-2">Estas Invitado</p>
+        <p id="entry-guest-name" class="hidden text-2xl sm:text-3xl font-semibold mb-2" style="color: rgb(240, 165, 176)"></p>
         <h2
           class="text-4xl sm:text-6xl font-bold leading-tight mb-6"
           style="color: color-mix(in srgb, rgb(240, 165, 176) 40%, white)"
@@ -336,24 +336,19 @@
         <h3 class="text-xl md:text-2xl font-semibold mb-2 mt-4">Confirmar asistencia</h3>
         <p class="mb-5 text-sm text-stone-500">Confirma antes del [fecha límite].</p>
         <label class="block text-sm font-medium text-stone-700 mb-3">¿Asistirás? *</label>
-        <div class="grid grid-cols-2 gap-3 md:gap-4">
-          <button
-            type="button"
-            onclick="setRsvp(this, 'yes')"
-            aria-pressed="false"
-            class="rsvp-btn yes flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-stone-200 bg-white hover:border-stone-300 hover:shadow-md font-semibold"
-          >
-            ✅ Sí, asistiré
-          </button>
-          <button
-            type="button"
-            onclick="setRsvp(this, 'no')"
-            aria-pressed="false"
-            class="rsvp-btn no flex items-center justify-center gap-2.5 px-4 py-3 rounded-2xl border-2 border-stone-200 bg-white hover:border-stone-300 hover:shadow-md font-semibold"
-          >
-            ✖️ No podré asistir
-          </button>
-        </div>
+        <!-- Filled by renderConfirmacion() in js/script.js: one row per name
+             of the guest's card, as many as their passes -->
+        <div id="rsvp-guests" class="grid gap-3"></div>
+        <button
+          id="rsvp-confirm"
+          type="button"
+          class="hidden cta-btn w-full mt-6 rounded-full text-white font-semibold py-4 text-base sm:text-lg disabled:opacity-60"
+        >
+          <span class="shine"></span>
+          <span class="relative">Confirmar</span>
+        </button>
+        <p id="rsvp-status" class="hidden mt-4 text-center font-medium" role="status"></p>
+        <p id="rsvp-no-guest" class="hidden text-stone-500">Abre el link de tu invitación para confirmar.</p>
       </section>
     </div>
 
@@ -363,6 +358,7 @@
       <p class="italic text-stone-700 opacity-80">¡곧 봐요!</p>
     </footer>
 
+    <script src="data/invitados.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>

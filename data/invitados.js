@@ -1,4 +1,4 @@
-{
+window.INVITADOS = {
   "cf1c026c49": {
     "nombre": "FAMILIA CABRERA CASTILLO",
     "pases": 2,
@@ -448,4 +448,4 @@
       "RICARDO MOLINA"
     ]
   }
-}
+};
