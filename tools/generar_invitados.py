@@ -16,7 +16,7 @@ import json
 import sys
 from pathlib import Path
 
-BASE_URL = "https://gabriel045.github.io/15-Isa/"
+BASE_URL = "https://arianaisabella15.github.io/ArianaSweet15/"
 
 ROOT = Path(__file__).resolve().parent.parent
 JSON_OUT = ROOT / "data" / "invitados.json"
