@@ -1,6 +1,6 @@
 // URL de la aplicación web de Google Apps Script que guarda las
 // confirmaciones en Google Sheets (ver tools/apps-script/README.md)
-const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzi4Ol2Vl8NCI_wfbXP36w3HAIaPqQuY7-n0ph2HD3wA7qnxqJEbNb1uEPHWT2j63A/exec';
+const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXElpsz4fKecCzJGUZs4wgJ4sYw049-mNhwFp9oTkjy68CIJMUunnQsG4i08LHNxU/exec';
 
 // Countdown — set your target date/time here
 const target = new Date('2026-12-30T19:00:00');
