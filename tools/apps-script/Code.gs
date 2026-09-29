@@ -67,16 +67,22 @@ function doGet(e) {
 }
 
 // Reemplaza la confirmación anterior de ese código, si existía, para que
-// volver a confirmar no duplique personas
+// volver a confirmar no duplique personas. Se reescribe la tabla completa
+// en una sola operación: borrar fila por fila con deleteRow es muy lento.
 function guardar(token, filas) {
   const sheet = obtenerHoja();
-  const datos = sheet.getDataRange().getValues();
-  for (let i = datos.length - 1; i >= 1; i--) {
-    if (datos[i][1] === token) sheet.deleteRow(i + 1);
-  }
-  sheet
-    .getRange(sheet.getLastRow() + 1, 1, filas.length, ENCABEZADOS.length)
-    .setValues(filas);
+  const anteriores = sheet.getLastRow() - 1;
+  const resto =
+    anteriores > 0
+      ? sheet
+          .getRange(2, 1, anteriores, ENCABEZADOS.length)
+          .getValues()
+          .filter((fila) => fila[1] !== token)
+      : [];
+  const tabla = resto.concat(filas);
+
+  if (anteriores > 0) sheet.getRange(2, 1, anteriores, ENCABEZADOS.length).clearContent();
+  sheet.getRange(2, 1, tabla.length, ENCABEZADOS.length).setValues(tabla);
 }
 
 function obtenerHoja() {
