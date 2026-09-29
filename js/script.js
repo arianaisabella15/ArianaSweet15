@@ -80,10 +80,15 @@ async function marcarConfirmados(lista) {
   const token = new URLSearchParams(window.location.search).get('i');
   if (!RSVP_ENDPOINT || !token) return;
 
+  // Apps Script puede tardar muchos segundos en responder; si mientras
+  // tanto el invitado ya tocó algún check, no se le pisa lo que marcó
+  let tocado = false;
+  lista.addEventListener('change', () => (tocado = true), { once: true });
+
   try {
     const res = await fetch(`${RSVP_ENDPOINT}?token=${encodeURIComponent(token)}`);
     const data = await res.json();
-    if (!data.ok || !data.confirmado) return;
+    if (tocado || !data.ok || !data.confirmado) return;
 
     const asistentes = new Set(data.asistentes);
     lista.querySelectorAll('input').forEach((check) => {
