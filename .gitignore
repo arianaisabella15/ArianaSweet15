@@ -1,0 +1,4 @@
+# Lista privada de invitados y links personales: se usan en local para
+# generar data/invitados.json, no se publican
+data/Book1.csv
+data/links-generados.csv
