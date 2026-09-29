@@ -69,6 +69,7 @@ function renderConfirmacion(invitado) {
 
   const boton = document.getElementById('rsvp-confirm');
   boton.classList.remove('hidden');
+  document.getElementById('rsvp-disclaimers').classList.remove('hidden');
   boton.addEventListener('click', () => enviarConfirmacion(boton, lista));
 
   marcarConfirmados(lista);
@@ -206,6 +207,16 @@ const revealObserver = new IntersectionObserver(
   { threshold: 0, rootMargin: '0px 0px -80px 0px' }
 );
 document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+
+// Gallery wiggle — each photo only wiggles while it is on screen, so it
+// starts moving when the guest scrolls to it (see .en-vista in style.css)
+const galleryObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => entry.target.classList.toggle('en-vista', entry.isIntersecting));
+  },
+  { threshold: 0.5 }
+);
+document.querySelectorAll('.gallery-item').forEach((el) => galleryObserver.observe(el));
 
 // Entry gate popup — locks scroll until the guest taps "Entrar"
 const entryGate = document.getElementById('entry-gate');

@@ -44,7 +44,28 @@ body {
   z-index: 20;
 }
 
+/* small periodic wiggle so the photos read as something you can touch.
+   Only runs while the photo is on screen (.en-vista is toggled by an
+   IntersectionObserver in js/script.js): it wiggles shortly after it
+   appears and then every 5s */
+.gallery-item.en-vista .polaroid {
+  animation: polaroid-wiggle 5s ease-in-out .4s infinite;
+}
+
+@keyframes polaroid-wiggle {
+  0%, 16%, 100% { transform: rotate(0); }
+  3% { transform: rotate(-2.5deg); }
+  6% { transform: rotate(2.5deg); }
+  9% { transform: rotate(-1.5deg); }
+  12% { transform: rotate(1deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-item.en-vista .polaroid { animation: none; }
+}
+
 .gallery-item:hover .polaroid {
+  animation: none;
   transform: scale(1.15);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 24px 48px -10px rgba(0, 0, 0, 0.4);
 }
