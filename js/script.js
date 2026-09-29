@@ -98,8 +98,12 @@ async function enviarConfirmacion(boton, lista) {
   const token = new URLSearchParams(window.location.search).get('i');
   const asistentes = [...lista.querySelectorAll('input:checked')].map((c) => c.value);
 
+  // Apps Script tarda varios segundos en responder, así que el
+  // agradecimiento se muestra de inmediato; si al final el envío falla, se
+  // reemplaza por el mensaje de error. El botón sigue desactivado mientras
+  // tanto para no mandar dos confirmaciones a la vez.
   boton.disabled = true;
-  mostrarEstadoRsvp('Enviando…', 'text-stone-500');
+  mostrarEstadoRsvp('¡Gracias! Tu confirmación fue registrada.', 'text-green-600');
   try {
     if (!RSVP_ENDPOINT) throw new Error('RSVP_ENDPOINT sin configurar');
     // Sin headers: el body va como text/plain, que Apps Script acepta sin
@@ -110,7 +114,6 @@ async function enviarConfirmacion(boton, lista) {
     });
     const data = await res.json();
     if (!data.ok) throw new Error(data.error);
-    mostrarEstadoRsvp('¡Gracias! Tu confirmación fue registrada.', 'text-green-600');
   } catch (err) {
     console.error('No se pudo enviar la confirmación', err);
     mostrarEstadoRsvp('No se pudo enviar la confirmación. Intenta de nuevo.', 'text-red-600');
