@@ -74,29 +74,63 @@ function renderConfirmacion(invitado) {
   marcarConfirmados(lista);
 }
 
+// ID de la hoja de Google, codificado para que no aparezca como texto en el
+// código (se genera con tools/codificar_hoja.py). Vacío = leer por Apps Script.
+const HOJA_ID_CODIFICADO = ["Y1puVzZVbFU3bHFNMS1z", "UzJnVnc1NHV1Zk9uWTNY", "NXAxc09KSE00THJmajE="];
+
+function hojaId() {
+  return HOJA_ID_CODIFICADO.map((parte) => atob(parte)).join('').split('').reverse().join('');
+}
+
 // Marca los checks con lo que la familia ya confirmó antes, leído de la
 // hoja de Google. Si falla, la lista simplemente queda sin marcar.
 async function marcarConfirmados(lista) {
   const token = new URLSearchParams(window.location.search).get('i');
-  if (!RSVP_ENDPOINT || !token) return;
+  // Los códigos son hexadecimales; validarlo evita meter texto raro en la
+  // consulta a la hoja
+  if (!token || !/^[0-9a-f]+$/.test(token)) return;
 
-  // Apps Script puede tardar muchos segundos en responder; si mientras
-  // tanto el invitado ya tocó algún check, no se le pisa lo que marcó
+  // La respuesta puede tardar; si mientras tanto el invitado ya tocó algún
+  // check, no se le pisa lo que marcó
   let tocado = false;
   lista.addEventListener('change', () => (tocado = true), { once: true });
 
   try {
-    const res = await fetch(`${RSVP_ENDPOINT}?token=${encodeURIComponent(token)}`);
-    const data = await res.json();
-    if (tocado || !data.ok || !data.confirmado) return;
+    // Si la lectura directa falla (p. ej. abriendo con file://, que Google
+    // no permite), se recurre a Apps Script, más lento pero sin esa limitación
+    const confirmacion = HOJA_ID_CODIFICADO.length
+      ? await leerConfirmacionDeHoja(token).catch(() => leerConfirmacionDeAppsScript(token))
+      : await leerConfirmacionDeAppsScript(token);
+    if (tocado || !confirmacion) return;
 
-    const asistentes = new Set(data.asistentes);
+    const asistentes = new Set(confirmacion);
     lista.querySelectorAll('input').forEach((check) => {
       check.checked = asistentes.has(check.value);
     });
   } catch (err) {
     console.error('No se pudo leer la confirmación guardada', err);
   }
+}
+
+// Lectura directa de la pestaña Confirmaciones (la hoja debe ser visible
+// con el enlace). Mucho más rápida que Apps Script. Devuelve los nombres con
+// "Sí", o null si esa familia aún no ha confirmado.
+async function leerConfirmacionDeHoja(token) {
+  const consulta = encodeURIComponent(`select D, E where B = '${token}'`);
+  const url = `https://docs.google.com/spreadsheets/d/${hojaId()}/gviz/tq?tqx=out:json&sheet=Confirmaciones&tq=${consulta}`;
+  const texto = await (await fetch(url)).text();
+  // La respuesta viene envuelta en google.visualization.Query.setResponse(...)
+  const data = JSON.parse(texto.slice(texto.indexOf('(') + 1, texto.lastIndexOf(')')));
+  const filas = data.table.rows.map((fila) => fila.c.map((celda) => celda && celda.v));
+  if (!filas.length) return null;
+  return filas.filter(([, asiste]) => asiste === 'Sí').map(([nombre]) => nombre);
+}
+
+async function leerConfirmacionDeAppsScript(token) {
+  if (!RSVP_ENDPOINT) return null;
+  const res = await fetch(`${RSVP_ENDPOINT}?token=${encodeURIComponent(token)}`);
+  const data = await res.json();
+  return data.ok && data.confirmado ? data.asistentes : null;
 }
 
 async function enviarConfirmacion(boton, lista) {
