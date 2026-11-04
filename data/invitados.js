@@ -223,11 +223,12 @@ window.INVITADOS = {
   },
   "8580ecb380": {
     "nombre": "FAMILIA RUIZ BRICEÑO",
-    "pases": 3,
+    "pases": 4,
     "invitados": [
       "ALEJANDRA BRICEÑO",
-      "YOHALIBETH RUIZ",
-      "PHILIP RUIZ"
+      "YHON RUIZ",
+      "PHILIP RUIZ",
+      "COSIMO FUIME"
     ]
   },
   "9e04fc6d20": {
