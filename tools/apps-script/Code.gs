@@ -24,7 +24,7 @@ function doPost(e) {
 
     const { token, asistentes } = JSON.parse(e.postData.contents);
 
-    const invitado = buscarInvitado(token);
+    const invitado = buscarInvitado(token, asistentes || []);
     if (!invitado) return responder({ ok: false, error: 'Código de invitación no válido' });
 
     // Solo se aceptan los nombres de esa tarjeta; los que no vienen marcados
@@ -114,14 +114,15 @@ function obtenerHoja() {
 }
 
 // Cachea la lista 10 minutos para no descargarla en cada confirmación. Si
-// el código no está en la copia cacheada, se vuelve a descargar: puede que
-// la lista se haya regenerado y publicado después de cachearla.
-function buscarInvitado(token) {
+// el código no está en la copia cacheada, o le falta alguno de los nombres
+// recibidos, se vuelve a descargar: puede que la lista se haya regenerado y
+// publicado después de cachearla.
+function buscarInvitado(token, nombres) {
   const cache = CacheService.getScriptCache();
   const guardado = cache.get('invitados');
   if (guardado) {
     const invitado = JSON.parse(guardado)[token];
-    if (invitado) return invitado;
+    if (invitado && nombres.every((nombre) => invitado.invitados.includes(nombre))) return invitado;
   }
 
   const json = UrlFetchApp.fetch(INVITADOS_URL).getContentText();
