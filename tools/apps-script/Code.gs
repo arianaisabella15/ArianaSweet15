@@ -11,8 +11,17 @@ const INVITADOS_URL = 'https://arianaisabella15.github.io/ArianaSweet15/data/inv
 const HOJA = 'Confirmaciones';
 const ENCABEZADOS = ['Fecha', 'Código', 'Tarjeta', 'Nombre', 'Asiste'];
 
+// Último día para confirmar (inclusive), en la zona horaria del proyecto de
+// Apps Script. Debe coincidir con RSVP_CIERRE de js/script.js; la página ya
+// bloquea los checks, pero esto evita que se envíe saltándose la página.
+const ULTIMO_DIA = '2026-11-30';
+
 function doPost(e) {
   try {
+    if (confirmacionCerrada()) {
+      return responder({ ok: false, error: 'La confirmación de asistencia ya está cerrada' });
+    }
+
     const { token, asistentes } = JSON.parse(e.postData.contents);
 
     const invitado = buscarInvitado(token);
@@ -43,6 +52,13 @@ function doPost(e) {
   } catch (err) {
     return responder({ ok: false, error: String(err) });
   }
+}
+
+// Compara solo la fecha (yyyy-MM-dd) con la hora del servidor, que el
+// invitado no puede cambiar como la de su dispositivo
+function confirmacionCerrada() {
+  const hoy = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  return hoy > ULTIMO_DIA;
 }
 
 // Devuelve lo que ya confirmó un código (?token=...), para que la página

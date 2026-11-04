@@ -2,6 +2,10 @@
 // confirmaciones en Google Sheets (ver tools/apps-script/README.md)
 const RSVP_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXElpsz4fKecCzJGUZs4wgJ4sYw049-mNhwFp9oTkjy68CIJMUunnQsG4i08LHNxU/exec';
 
+// Último día para confirmar: 30 de noviembre. Desde el 1 de diciembre a las
+// 00:00 (hora local) los checks y el botón quedan deshabilitados
+const RSVP_CIERRE = new Date('2026-12-01T00:00:00');
+
 // Countdown — set your target date/time here
 const target = new Date('2026-12-30T19:00:00');
 function tick() {
@@ -72,7 +76,16 @@ function renderConfirmacion(invitado) {
   document.getElementById('rsvp-disclaimers').classList.remove('hidden');
   boton.addEventListener('click', () => enviarConfirmacion(boton, lista));
 
+  if (new Date() >= RSVP_CIERRE) cerrarConfirmacion(boton, lista);
+
   marcarConfirmados(lista);
+}
+
+// Pasada la fecha límite se ve lo ya confirmado pero ya no se puede cambiar
+function cerrarConfirmacion(boton, lista) {
+  boton.disabled = true;
+  lista.querySelectorAll('input').forEach((check) => (check.disabled = true));
+  mostrarEstadoRsvp('La confirmación de asistencia ya está cerrada.', 'text-stone-500');
 }
 
 // ID de la hoja de Google, codificado para que no aparezca como texto en el
@@ -135,6 +148,7 @@ async function leerConfirmacionDeAppsScript(token) {
 }
 
 async function enviarConfirmacion(boton, lista) {
+  if (new Date() >= RSVP_CIERRE) return cerrarConfirmacion(boton, lista);
   const token = new URLSearchParams(window.location.search).get('i');
   const asistentes = [...lista.querySelectorAll('input:checked')].map((c) => c.value);
 

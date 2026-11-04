@@ -70,6 +70,10 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 24px 48px -10px rgba(0, 0, 0, 0.4);
 }
 
+.punto-rosa {
+  color: rgb(240, 165, 176);
+}
+
 .cd-box {
   background: rgb(240, 165, 176);
   color: #fff;
@@ -87,6 +91,15 @@ body {
 
 .rsvp-guest input {
   accent-color: #22c55e;
+}
+
+/* Pasada la fecha límite (ver RSVP_CIERRE en js/script.js) */
+.rsvp-guest:has(input:disabled) {
+  filter: blur(1px);
+  opacity: .75;
+  box-shadow: none;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* CTA button with the exact gradient + animated "shine" sweep from the original */
