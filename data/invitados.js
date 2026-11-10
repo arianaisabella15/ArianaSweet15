@@ -295,10 +295,10 @@ window.INVITADOS = {
     ]
   },
   "6ee16c4c05": {
-    "nombre": "ANNY MANJARREZ",
+    "nombre": "ANNY MANJARRES",
     "pases": 1,
     "invitados": [
-      "ANNY MANJARREZ"
+      "ANNY MANJARRES"
     ]
   },
   "6a489cac74": {
@@ -392,12 +392,11 @@ window.INVITADOS = {
       "DIEGO NAVARRO"
     ]
   },
-  "40a9ae38c5": {
-    "nombre": "HNOS. MONTENEGRO",
-    "pases": 2,
+  "8e64c728dc": {
+    "nombre": "JUAN DIEGO USECHE",
+    "pases": 1,
     "invitados": [
-      "GABRIEL MONTENEGRO",
-      "DAVID MONTENEGRO"
+      "JUAN DIEGO USECHE"
     ]
   },
   "bca17b3bb8": {

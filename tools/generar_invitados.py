@@ -26,10 +26,20 @@ JS_OUT = ROOT / "data" / "invitados.js"
 LINKS_OUT = ROOT / "data" / "links-generados.csv"
 
 
+# Tarjetas cuyo nombre se corrigió después de enviar el link: conservan el
+# token del nombre anterior para que el link ya enviado siga funcionando.
+TOKENS_FIJOS = {
+    "ANNY MANJARRES": "6ee16c4c05",  # antes ANNY MANJARREZ
+}
+
+
 def generar_token(nombre: str) -> str:
     # Determinístico: el mismo nombre siempre genera el mismo token,
     # así se puede volver a correr el script sin invalidar links ya enviados.
-    return hashlib.sha256(nombre.strip().encode("utf-8")).hexdigest()[:10]
+    nombre = nombre.strip()
+    if nombre in TOKENS_FIJOS:
+        return TOKENS_FIJOS[nombre]
+    return hashlib.sha256(nombre.encode("utf-8")).hexdigest()[:10]
 
 
 def main(csv_path: str) -> None:
